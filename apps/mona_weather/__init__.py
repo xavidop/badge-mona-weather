@@ -96,8 +96,11 @@ CREAM_DIM = color.rgb(200, 196, 180)
 AMBER = color.rgb(255, 200, 48)
 RED = color.rgb(230, 70, 70)
 BLUE = color.rgb(90, 160, 240)
-PANEL = color.rgb(20, 20, 32, 170)
+PANEL = color.rgb(20, 20, 32, 200)
+PANEL_ALT = color.rgb(255, 255, 255, 18)
 TRACK = color.rgb(20, 20, 32, 90)
+BLUE_LIGHT = color.rgb(130, 200, 255)
+HEADER_H = 28
 
 TITLE = font.futile
 BIG = font.ignore
@@ -369,16 +372,22 @@ def draw_sky(icon):
 
 
 def draw_header():
-    fill(0, 0, WIDTH, 22, PANEL)
+    """A dark bar with the city in the big font, arrows for the city list; tabs in the footer."""
+    fill(0, 0, WIDTH, HEADER_H, PANEL)
     place = weather.place if weather.city == 0 else weather.name
-    write("<", 6, 4, CREAM_DIM, BODY)
-    write_centred(place, WIDTH // 2, 4, CREAM, BODY)
-    write_right(">", WIDTH - 6, 4, CREAM_DIM, BODY)
+    face = TITLE if text_width(place, TITLE) <= WIDTH - 60 else BODY
+    write("<", 8, 6, CREAM_DIM, TITLE)
+    write_centred(place, WIDTH // 2, 2 if face == TITLE else 8, CREAM, face)
+    write_right(">", WIDTH - 8, 6, CREAM_DIM, TITLE)
+    fill(0, HEIGHT - 20, WIDTH, 20, PANEL)
     x = 8
     for index, label in enumerate(PAGES):
-        pen = AMBER if index == page else CREAM_DIM
-        write(label, x, HEIGHT - 17, pen, SMALL)
-        x += text_width(label, SMALL) + 12
+        if index == page:
+            fill(x - 3, HEIGHT - 18, text_width(label, BODY) + 6, 16, AMBER)
+            write(label, x, HEIGHT - 17, INK, BODY)
+        else:
+            write(label, x, HEIGHT - 17, CREAM, BODY)
+        x += text_width(label, BODY) + 14
     # the network status sits right-aligned in the footer, kept short of the tabs
     line, pen = None, CREAM_DIM
     if weather.error:
@@ -391,7 +400,7 @@ def draw_header():
         age = (badge.ticks - weather.fetched_at) // 60000
         line = "UPDATED JUST NOW" if age < 1 else "UPDATED %dM AGO" % age
     if line:
-        write_right(line[:24], WIDTH - 8, HEIGHT - 17, pen, SMALL)
+        write_right(line[:22], WIDTH - 8, HEIGHT - 17, pen, SMALL)
 
 
 def draw_mascot(icon, x, y):
@@ -404,21 +413,26 @@ def draw_now(forecast):
     label, icon = icon_for(forecast["code"], forecast["day"])
     draw_sky(icon)
     draw_header()
-    draw_icon(icon, 22, 44, 96)
-    write(degrees(forecast["temp"]), 130, 40, CREAM, BIG)
-    write(label, 130, 72, AMBER, BODY)
+    # everything readable sits on one dark card; Mona stands on the grass beside it
+    fill(8, HEADER_H + 6, 232, 178, PANEL)
+    draw_icon(icon, 20, HEADER_H + 20, 80)
+    write(degrees(forecast["temp"]), 112, HEADER_H + 10, CREAM, BIG)
+    write(label, 112, HEADER_H + 42, AMBER, BODY)
     rows = (
-        ("FEELS", degrees(forecast["feels"])),
+        ("FEELS LIKE", degrees(forecast["feels"])),
         ("HUMIDITY", "%d%%" % forecast["humidity"]),
         ("WIND", "%d %s" % (round(forecast["wind"]), forecast["units"][1].upper())),
-        ("SUN", "%s - %s" % (forecast["sunrise"], forecast["sunset"])),
+        ("SUNRISE", forecast["sunrise"]),
+        ("SUNSET", forecast["sunset"]),
     )
     for n, (name, value) in enumerate(rows):
-        y = 96 + n * 20
-        write(name, 130, y + 1, CREAM_DIM, SMALL)
-        write(value, 196, y, CREAM, BODY)
-    write("AS OF %s %s" % (forecast["time"], forecast["zone"]), 130, 180, CREAM_DIM, SMALL)
-    draw_mascot(icon, 36, 140)
+        y = HEADER_H + 70 + n * 19
+        if n % 2 == 0:
+            fill(12, y - 2, 224, 18, PANEL_ALT)
+        write(name, 20, y + 1, CREAM_DIM, SMALL)
+        write_right(value, 230, y, CREAM, BODY)
+    write("AS OF %s %s" % (forecast["time"], forecast["zone"]), 20, HEADER_H + 166, CREAM_DIM, SMALL)
+    draw_mascot(icon, 250, 132)
 
 
 def draw_hourly(forecast):
@@ -429,21 +443,26 @@ def draw_hourly(forecast):
     temps = [h[1] for h in hours]
     low, high = min(temps), max(temps)
     span = max(1.0, high - low)
-    width = (WIDTH - 16) // len(hours)
-    fill(8, 26, WIDTH - 16, HEIGHT - 50, TRACK)
+    left, top, width_all = 8, HEADER_H + 6, WIDTH - 16
+    fill(left, top, width_all, HEIGHT - top - 26, PANEL)
+    width = width_all // len(hours)
     for n, (when, temp, code, rain) in enumerate(hours):
-        x = 8 + n * width
-        day = forecast["day"] if n < 1 else not (int(when[:2]) < 7 or int(when[:2]) >= 19)
+        x = left + n * width
+        if n % 2 == 0:
+            fill(x, top, width, HEIGHT - top - 26, PANEL_ALT)
+        hour = int(when[:2])
+        day = forecast["day"] if n < 1 else not (hour < 7 or hour >= 19)
         _, hour_icon = icon_for(code, day)
-        write_centred(when[:2], x + width // 2, 30, CREAM_DIM, SMALL)
-        draw_icon(hour_icon, x + width // 2 - 8, 44, 16)
-        bar_h = int(20 + 70 * (temp - low) / span)
-        fill(x + 4, 170 - bar_h, width - 8, bar_h, AMBER if temp == high else CREAM)
-        write_centred("%d" % round(temp), x + width // 2, 170 - bar_h - 14, CREAM, SMALL)
+        write_centred("%d" % hour, x + width // 2, top + 4, CREAM, BODY)
+        draw_icon(hour_icon, x + width // 2 - 8, top + 20, 16)
+        bar_h = int(16 + 60 * (temp - low) / span)
+        base = HEIGHT - 50
+        fill(x + 5, base - bar_h, width - 10, bar_h, AMBER if temp == high else CREAM)
+        write_centred("%d" % round(temp), x + width // 2, base - bar_h - 15, CREAM, BODY)
         if rain:
-            write_centred("%d%%" % rain, x + width // 2, 174, BLUE, SMALL)
-    write("NEXT 12 HOURS", 12, 196, CREAM_DIM, SMALL)
-    write_right("RAIN CHANCE IN BLUE", WIDTH - 12, 196, BLUE, SMALL)
+            write_centred("%d%%" % rain, x + width // 2, base + 4, BLUE_LIGHT, SMALL)
+    write("NEXT 12 HOURS, %s" % ("F" if state["fahrenheit"] else "C"), left + 6, HEIGHT - 34, CREAM_DIM, SMALL)
+    write_right("BLUE = CHANCE OF RAIN", WIDTH - 14, HEIGHT - 34, BLUE_LIGHT, SMALL)
 
 
 def draw_week(forecast):
@@ -455,36 +474,41 @@ def draw_week(forecast):
     highs = [d[2] for d in days]
     coldest, hottest = min(lows), max(highs)
     span = max(1.0, hottest - coldest)
-    fill(8, 26, WIDTH - 16, HEIGHT - 50, TRACK)
+    top = HEADER_H + 6
+    fill(8, top, WIDTH - 16, HEIGHT - top - 26, PANEL)
+    row_h = (HEIGHT - top - 30) // len(days)
     for n, (date, code, high, low, rain) in enumerate(days):
-        y = 30 + n * 27
+        y = top + 4 + n * row_h
+        if n % 2 == 0:
+            fill(10, y - 2, WIDTH - 20, row_h, PANEL_ALT)
         name = "TODAY" if n == 0 else WEEKDAYS[weekday(date)]
-        write(name, 14, y + 4, CREAM, BODY)
+        write(name, 16, y + 5, CREAM, BODY)
         _, day_icon = icon_for(code, True)
-        draw_icon(day_icon, 72, y, 20)
-        write_right(degrees(low), 136, y + 4, CREAM_DIM, BODY)
-        left = 144 + int(110 * (low - coldest) / span)
-        right = 144 + int(110 * (high - coldest) / span)
-        fill(144, y + 8, 110, 6, INK)
-        fill(left, y + 8, max(6, right - left), 6, AMBER)
-        write(degrees(high), 262, y + 4, CREAM, BODY)
+        draw_icon(day_icon, 68, y, 22)
+        write_right(degrees(low), 140, y + 5, CREAM_DIM, BODY)
+        bar_left = 148 + int(100 * (low - coldest) / span)
+        bar_right = 148 + int(100 * (high - coldest) / span)
+        fill(148, y + 8, 100, 8, INK)
+        fill(bar_left, y + 8, max(8, bar_right - bar_left), 8, AMBER)
+        write(degrees(high), 256, y + 5, CREAM, BODY)
         if rain:
-            write_right("%d%%" % rain, WIDTH - 14, y + 5, BLUE, SMALL)
+            write_right("%d%%" % rain, WIDTH - 14, y + 6, BLUE_LIGHT, SMALL)
 
 
 def draw_waiting():
     draw_sky(PARTLY)
     draw_header()
-    draw_mascot(CLOUD, 36, 120)
+    fill(100, HEADER_H + 20, WIDTH - 110, 130, PANEL)
+    draw_mascot(CLOUD, 30, 128)
     if weather.error:
-        write_centred("NO FORECAST YET", WIDTH // 2 + 30, 80, CREAM, TITLE)
-        screen.font = SMALL
-        screen.pen = CREAM
-        screen.text(weather.error, rect(120, 112, 190, 60), align=(LEFT, TOP))
-        write_centred("SELECT: TRY AGAIN", WIDTH // 2 + 30, 180, AMBER, SMALL)
+        write_centred("NO FORECAST YET", 205, HEADER_H + 30, CREAM, TITLE)
+        screen.font = BODY
+        screen.pen = CREAM_DIM
+        screen.text(weather.error, rect(112, HEADER_H + 62, WIDTH - 130, 56), align=(LEFT, TOP))
+        write_centred("SELECT: TRY AGAIN", 205, HEADER_H + 124, AMBER, BODY)
     else:
-        write_centred("FETCHING THE FORECAST", WIDTH // 2 + 30, 90, CREAM, TITLE)
-        write_centred(weather.status.upper() + "." * (1 + (badge.ticks // 300) % 3), WIDTH // 2 + 30, 124, AMBER, BODY)
+        write_centred("FETCHING FORECAST", 205, HEADER_H + 40, CREAM, TITLE)
+        write_centred(weather.status.upper() + "." * (1 + (badge.ticks // 300) % 3), 205, HEADER_H + 80, AMBER, BODY)
 
 
 def update():

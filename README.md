@@ -2,9 +2,9 @@
 
 An 8-bit weather app for the GitHub Universe 2026 badge: the forecast where you are or in two dozen cities, from Open-Meteo, with Mona dressed for the conditions.
 
-| Now | Hourly | Week | No Signal |
+| Now | Hourly | Week | Fetching |
 | --- | --- | --- | --- |
-| ![now](screenshots/now.png) | ![hourly](screenshots/hourly.png) | ![week](screenshots/week.png) | ![no signal](screenshots/no_signal.png) |
+| ![now](screenshots/now.png) | ![hourly](screenshots/hourly.png) | ![week](screenshots/week.png) | ![fetching](screenshots/fetching.png) |
 
 Mona is drawn the way the badge's own apps draw her: white outline, purple
 fur, peach face, two-pixel eyes and tentacles.
