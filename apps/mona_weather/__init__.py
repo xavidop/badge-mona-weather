@@ -388,6 +388,11 @@ def draw_header():
         else:
             write(label, x, HEIGHT - 17, CREAM, BODY)
         x += text_width(label, BODY) + 14
+    # the unit switch: a chip naming the button and the unit it switches to
+    other = "C" if state["fahrenheit"] else "F"
+    chip = "MENU: " + other
+    fill(x + 2, HEIGHT - 18, text_width(chip, SMALL) + 8, 16, PANEL_ALT)
+    write(chip, x + 6, HEIGHT - 16, CREAM, SMALL)
     # the network status sits right-aligned in the footer, kept short of the tabs
     line, pen = None, CREAM_DIM
     if weather.error:
@@ -400,7 +405,7 @@ def draw_header():
         age = (badge.ticks - weather.fetched_at) // 60000
         line = "UPDATED JUST NOW" if age < 1 else "UPDATED %dM AGO" % age
     if line:
-        write_right(line[:22], WIDTH - 8, HEIGHT - 17, pen, SMALL)
+        write_right(line[:18], WIDTH - 8, HEIGHT - 17, pen, SMALL)
 
 
 def draw_mascot(icon, x, y):
@@ -415,7 +420,7 @@ def draw_now(forecast):
     draw_header()
     # everything readable sits on one dark card; Mona stands on the grass beside it
     fill(8, HEADER_H + 6, 232, 178, PANEL)
-    draw_icon(icon, 20, HEADER_H + 20, 80)
+    draw_icon(icon, 28, HEADER_H + 12, 64)
     write(degrees(forecast["temp"]), 112, HEADER_H + 10, CREAM, BIG)
     write(label, 112, HEADER_H + 42, AMBER, BODY)
     rows = (

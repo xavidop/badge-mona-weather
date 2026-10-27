@@ -2,9 +2,9 @@
 
 An 8-bit weather app for the GitHub Universe 2026 badge: the forecast where you are or in two dozen cities, from Open-Meteo, with Mona dressed for the conditions.
 
-| Now | Hourly | Week | Fetching |
+| Now | Hourly | Week | Fahrenheit |
 | --- | --- | --- | --- |
-| ![now](screenshots/page_now.png) | ![hourly](screenshots/page_hourly.png) | ![week](screenshots/page_week.png) | ![fetching](screenshots/page_fetching.png) |
+| ![now](screenshots/page_now.png) | ![hourly](screenshots/page_hourly.png) | ![week](screenshots/page_week.png) | ![fahrenheit](screenshots/page_fahrenheit.png) |
 
 Mona is drawn the way the badge's own apps draw her: white outline, purple
 fur, peach face, two-pixel eyes and tentacles.
@@ -29,7 +29,7 @@ Needs Wi-Fi: put the network name and password in the badge's `secrets.py` (`WIF
 | Left / Right | Change city: "Here" first, then 23 cities around the world |
 | Up / Down | Now, Hourly or Week |
 | Select | Fetch again now |
-| Menu | Switch between Celsius and Fahrenheit |
+| Menu | Switch between Celsius and Fahrenheit; the footer chip names the unit it switches to, and the forecast is refetched in the new unit |
 
 ## How it works
 

@@ -12,7 +12,7 @@ city is kept so the app still shows something offline.
 * Left / Right: change city ("Here" first, then 23 cities around the world)
 * Up / Down: switch between Now, Hourly and Week
 * Select: fetch again now
-* Menu: switch between Celsius and Fahrenheit
+* Menu: switch between Celsius and Fahrenheit (the footer shows "MENU: F" or "MENU: C" for the unit it switches to)
 
 ## Requirements
 
