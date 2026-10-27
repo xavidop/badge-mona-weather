@@ -4,7 +4,7 @@ An 8-bit weather app for the GitHub Universe 2026 badge: the forecast where you 
 
 | Now | Hourly | Week | Fetching |
 | --- | --- | --- | --- |
-| ![now](screenshots/now.png) | ![hourly](screenshots/hourly.png) | ![week](screenshots/week.png) | ![fetching](screenshots/fetching.png) |
+| ![now](screenshots/page_now.png) | ![hourly](screenshots/page_hourly.png) | ![week](screenshots/page_week.png) | ![fetching](screenshots/page_fetching.png) |
 
 Mona is drawn the way the badge's own apps draw her: white outline, purple
 fur, peach face, two-pixel eyes and tentacles.
